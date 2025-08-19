@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, Zap, Server } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import aboutImage from "@/assets/about-image.jpg";
 
 const AboutSection = () => {
   const [inView, setInView] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -23,6 +25,11 @@ const AboutSection = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Navigate to Stock Information page
+  const goToStockInformation = () => {
+    navigate("/stock-information"); // ✅ matches your <Route path="/stock-information" ... /> in App.tsx
+  };
 
   return (
     <section 
@@ -80,6 +87,7 @@ const AboutSection = () => {
             <Button 
               className="tech-button group"
               size="lg"
+              onClick={goToStockInformation} // ✅ navigate to StockInformation
             >
               View Stock Information
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
