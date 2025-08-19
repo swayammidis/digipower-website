@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Zap } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,15 +15,16 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const location = useLocation();
+  
   const navItems = [
-    { name: "Home", href: "#" },
-    { name: "Investor Relations", href: "#investor" },
-    { name: "Press Releases", href: "#press" },
-    { name: "Presentations", href: "#presentations" },
-    { name: "Stock Information", href: "#stock" },
-    { name: "SEC Filings", href: "#sec" },
-    { name: "Leadership & Committees", href: "#leadership" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/" },
+    { name: "Investor Relations", href: "/investor-relations" },
+    { name: "Press Releases", href: "/press-releases" },
+    { name: "Presentations", href: "/presentations" },
+    { name: "Stock Information", href: "/stock-information" },
+    { name: "SEC Filings", href: "/sec-filings" },
+    { name: "Leadership & Committees", href: "/leadership" },
   ];
 
   return (
@@ -34,27 +36,47 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <div className="text-2xl font-bold">
-              <span className="text-primary">DIGIPOWER</span>
-              <span className="text-foreground"> X</span>
+          <Link to="/" className="flex-shrink-0">
+            <div className="flex items-center gap-3 group">
+              <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-all duration-300 group-hover:scale-110">
+                <Zap className="w-6 h-6 text-primary group-hover:rotate-12 transition-transform duration-300" />
+              </div>
+              <div className="text-2xl font-bold">
+                <span className="text-primary">DIGIPOWER</span>
+                <span className="text-foreground"> X</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:block">
             <div className="ml-10 flex items-baseline space-x-8">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
-                  className="text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-medium relative group"
+                  to={item.href}
+                  className={`transition-colors duration-300 text-sm font-medium relative group ${
+                    location.pathname === item.href 
+                      ? 'text-primary' 
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
                 >
                   {item.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-electric group-hover:w-full transition-all duration-300"></span>
-                </a>
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-electric transition-all duration-300 ${
+                    location.pathname === item.href ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`}></span>
+                </Link>
               ))}
             </div>
+          </div>
+
+          {/* Contact Us Button */}
+          <div className="hidden lg:block">
+            <Link to="/contact-us">
+              <Button className="tech-button bg-gradient-electric hover:scale-105 transition-all duration-300">
+                Contact Us
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -76,15 +98,26 @@ const Navigation = () => {
         <div className="lg:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-card/95 backdrop-blur-lg border-b border-border">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
-                className="text-muted-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-300"
+                to={item.href}
+                className={`block px-3 py-2 text-base font-medium transition-colors duration-300 ${
+                  location.pathname === item.href 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground hover:text-primary'
+                }`}
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
+            <Link
+              to="/contact-us"
+              className="block px-3 py-2 text-base font-medium text-muted-foreground hover:text-primary transition-colors duration-300"
+              onClick={() => setIsOpen(false)}
+            >
+              Contact Us
+            </Link>
           </div>
         </div>
       )}
