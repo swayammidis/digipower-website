@@ -9,10 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Mail, Phone, MapPin, Clock, Send, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:1337";
+
 const ContactUs = () => {
   const [inView, setInView] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
     company: "",
     subject: "",
@@ -71,17 +74,36 @@ const ContactUs = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the form data to your backend
-    toast.success("Thank you for your message! We'll get back to you within 24 hours.");
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      subject: "",
-      message: ""
-    });
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_URL}/api/contact-submission`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: formData }),
+      });
+
+      if (!res.ok) throw new Error("Failed to send message");
+
+      toast.success("✅ Thank you for your message! We'll get back to you within 24 hours.");
+
+      setFormData({
+        full_name: "",
+        email: "",
+        company: "",
+        subject: "",
+        message: ""
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("❌ Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -167,11 +189,11 @@ const ContactUs = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="full_name">Full Name *</Label>
                       <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
+                        id="full_name"
+                        name="full_name"
+                        value={formData.full_name}
                         onChange={handleInputChange}
                         required
                         className="bg-background/50 border-border/50 focus:border-primary/50"
@@ -237,10 +259,15 @@ const ContactUs = () => {
                     <Button 
                       type="submit" 
                       size="lg" 
+                      disabled={loading}
                       className="tech-button bg-gradient-electric hover:scale-105 transition-all duration-300 min-w-[200px]"
                     >
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Message
+                      {loading ? "Sending..." : (
+                        <>
+                          <Send className="w-5 h-5 mr-2" />
+                          Send Message
+                        </>
+                      )}
                     </Button>
                   </div>
                 </form>

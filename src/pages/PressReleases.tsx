@@ -1,81 +1,78 @@
 import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowRight } from "lucide-react";
 
 const PressReleases = () => {
   const [inView, setInView] = useState(false);
+  const [pressReleases, setPressReleases] = useState<any[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
 
+  // 🔹 Fetch data from Strapi API
+  useEffect(() => {
+    const fetchPressReleases = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:1337/api/press-releases?populate=*"
+        );
+        const data = res.data;
+
+        // Map Strapi response to frontend format
+        const mapped = data.data.map((item: any) => {
+          const attrs = item.attributes || item; // Handle both Strapi v4 (attributes) & flat JSON
+
+          return {
+            id: item.id,
+            title: attrs.Title || "Untitled",
+            date: attrs.releaseDate
+              ? new Date(attrs.releaseDate).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "No date",
+            category: attrs.Category?.replace(/"/g, "") || "General",
+            excerpt: attrs.Summary || "",
+            featured: attrs.Featured || false,
+            // ✅ FIX: look inside pdfFile array instead of attrs.pdf
+            pdf:
+              attrs.pdfFile && attrs.pdfFile.length > 0
+                ? `http://localhost:1337${attrs.pdfFile[0].url}`
+                : null,
+          };
+        });
+
+        setPressReleases(mapped);
+      } catch (error) {
+        console.error("Error fetching press releases:", error);
+        setPressReleases([]); // fallback to avoid null.map crash
+      }
+    };
+
+    fetchPressReleases();
+  }, []);
+
+  // 🔹 Intersection observer for animation
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-        }
+        if (entry.isIntersecting) setInView(true);
       },
       { threshold: 0.1 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
-
-  const pressReleases = [
-       {
-      title: "Digi Power X Reports Solid Mid-Year Financial Position, Removal of 'Going Concern' Risk and Positive Adjusted EBITDA in Q2 2025",
-      date: "August 14, 2025",
-      category: "Corporate News",
-      excerpt: "DigiPower X announces the launch of its new subsidiary focused on sustainable data center infrastructure across the United States.",
-      featured: true,
-      pdf: "/assets/August 14, 2025.pdf",
-    },
-    {
-      title: "Digi Power X Reports 122% Month-Over-Month Increase in Cash and Crypto Position with No Long-Term Debt and Reports July 2025 Production Results",
-      date: "August 4, 2025",
-      category: "Corporate News",
-      excerpt: "DigiPower X announces the launch of its new subsidiary focused on sustainable data center infrastructure across the United States.",
-      featured: true,
-      pdf: "/assets/August 4, 2025",
-    },
-    {
-      title: "Digi Power X Subsidiary, US Data Centers Inc., Files Provisional Patent for ARMS 200 Modular AI Data Center Platform",
-      date: "July 28, 2025",
-      category: "Financial",
-      excerpt: "DigiPower X reports strong Q4 2024 results with $37.0M total revenue and continued expansion of mining operations.",
-      featured: false,
-      pdf: "/assets/July 28, 2025.pdf",
-    },
-    {
-      title: "Digi Power X Announces $15 Million Registered Direct Offering of Common Stock",
-      date: "July 21, 2025",
-      category: "Partnership",
-      excerpt: "New partnership enhances grid infrastructure capabilities and expands market reach in renewable energy sector.",
-      featured: false,
-      pdf: "/assets/July 21, 2025",
-    },
-    {
-      title: "Digi Power X Acquires Supermicro NVIDIA B200 Systems to Launch Tier 3 NeoCloud AI Infrastructure",
-      date: "July 17, 2025",
-      category: "Operations",
-      excerpt: "DigiPower X successfully completes installation of state-of-the-art mining infrastructure at third US-based site.",
-      featured: false,
-      pdf: "/assets/July 17, 2025.pdf",
-    },
-    {
-      title: "Digi Power X Announces Proposed Shares for Debt Settlement with NANO Nuclear Energy",
-      date: "july 3, 2025",
-      category: "Milestone",
-      excerpt: "Company achieves significant infrastructure milestone with 100 megawatts of developed electrical capacity.",
-      featured: false,
-      pdf: "/assets/July 3, 2025.pdf",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +90,8 @@ const PressReleases = () => {
               Press Releases
             </h1>
             <p className="text-xl text-muted-foreground mb-8 animate-slide-in-right">
-              Stay updated with the latest news and announcements from DigiPower X
+              Stay updated with the latest news and announcements from DigiPower
+              X
             </p>
           </div>
         </div>
@@ -105,9 +103,11 @@ const PressReleases = () => {
           <div className="max-w-4xl mx-auto">
             {pressReleases.map((release, index) => (
               <Card
-                key={index}
+                key={release.id}
                 className={`group mb-6 bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 hover:scale-[1.02] hover:shadow-glow cursor-pointer ${
-                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  inView
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-10"
                 } ${release.featured ? "border-primary/30 bg-gradient-glow" : ""}`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
@@ -116,12 +116,18 @@ const PressReleases = () => {
                     <div className="flex items-center gap-3">
                       <Badge
                         variant={release.featured ? "default" : "secondary"}
-                        className={release.featured ? "bg-primary text-primary-foreground" : ""}
+                        className={
+                          release.featured
+                            ? "bg-primary text-primary-foreground"
+                            : ""
+                        }
                       >
                         {release.category}
                       </Badge>
                       {release.featured && (
-                        <Badge className="bg-gradient-electric text-white">Featured</Badge>
+                        <Badge className="bg-gradient-electric text-white">
+                          Featured
+                        </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -134,24 +140,30 @@ const PressReleases = () => {
                       release.featured ? "text-2xl lg:text-3xl" : ""
                     }`}
                   >
-                    <a
-                      href={release.pdf}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline"
-                    >
-                      {release.title}
-                    </a>
+                    {release.pdf ? (
+                      <a
+                        href={release.pdf}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {release.title}
+                      </a>
+                    ) : (
+                      release.title
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-base mb-4">
                     {release.excerpt}
                   </CardDescription>
-                  <div className="flex items-center gap-2 text-primary group-hover:gap-3 transition-all duration-300">
-                    <span className="text-sm font-medium">Read more</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </div>
+                  {release.pdf && (
+                    <div className="flex items-center gap-2 text-primary group-hover:gap-3 transition-all duration-300">
+                      <span className="text-sm font-medium">Read more</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
