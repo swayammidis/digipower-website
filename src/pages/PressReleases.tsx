@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowRight } from "lucide-react";
+import { API_URL } from "@/lib/api"; 
 
 const PressReleases = () => {
   const [inView, setInView] = useState(false);
@@ -21,14 +22,12 @@ const PressReleases = () => {
   useEffect(() => {
     const fetchPressReleases = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:1337/api/press-releases?populate=*"
-        );
+        const res = await axios.get(`${API_URL}/api/press-releases?populate=*`);
         const data = res.data;
 
         // Map Strapi response to frontend format
         const mapped = data.data.map((item: any) => {
-          const attrs = item.attributes || item; // Handle both Strapi v4 (attributes) & flat JSON
+          const attrs = item.attributes || item;
 
           return {
             id: item.id,
@@ -43,10 +42,10 @@ const PressReleases = () => {
             category: attrs.Category?.replace(/"/g, "") || "General",
             excerpt: attrs.Summary || "",
             featured: attrs.Featured || false,
-            // ✅ FIX: look inside pdfFile array instead of attrs.pdf
+            // ✅ pdf file comes from Strapi uploads, prepend backend URL
             pdf:
               attrs.pdfFile && attrs.pdfFile.length > 0
-                ? `http://localhost:1337${attrs.pdfFile[0].url}`
+                ? `${API_URL}${attrs.pdfFile[0].url}`
                 : null,
           };
         });
@@ -54,7 +53,7 @@ const PressReleases = () => {
         setPressReleases(mapped);
       } catch (error) {
         console.error("Error fetching press releases:", error);
-        setPressReleases([]); // fallback to avoid null.map crash
+        setPressReleases([]);
       }
     };
 
