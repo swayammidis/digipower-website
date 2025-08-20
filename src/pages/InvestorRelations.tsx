@@ -1,12 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, TrendingUp, DollarSign, Users, Download, ArrowRight } from "lucide-react";
 
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://fruitful-nest-5c8d028fc8.strapiapp.com";
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN; // optional
+
 const InvestorRelations = () => {
   const [inView, setInView] = useState(false);
+  const [pressReleases, setPressReleases] = useState<any[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -26,32 +34,62 @@ const InvestorRelations = () => {
     return () => observer.disconnect();
   }, []);
 
+  // 🔹 Fetch latest 3 press releases from Strapi
+  useEffect(() => {
+    const fetchPressReleases = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/press-releases?populate=*`, {
+          headers: API_TOKEN ? { Authorization: `Bearer ${API_TOKEN}` } : {},
+        });
+
+        const data = res.data;
+
+        // Map and sort by releaseDate (latest first)
+        const mapped = data.data
+          .map((item: any) => {
+            const attrs = item.attributes || item;
+
+            return {
+              id: item.id,
+              title: attrs.Title || "Untitled",
+              date: attrs.releaseDate
+                ? new Date(attrs.releaseDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "No date",
+              category: attrs.Category?.replace(/"/g, "") || "General",
+              excerpt: attrs.Summary || "",
+              pdf:
+                attrs.pdfFile && attrs.pdfFile.length > 0
+                  ? attrs.pdfFile[0].url
+                  : null,
+              releaseDate: attrs.releaseDate ? new Date(attrs.releaseDate) : null,
+            };
+          })
+          .sort((a: any, b: any) =>
+            b.releaseDate && a.releaseDate
+              ? b.releaseDate.getTime() - a.releaseDate.getTime()
+              : 0
+          )
+          .slice(0, 3);
+
+        setPressReleases(mapped);
+      } catch (error) {
+        console.error("Error fetching press releases:", error);
+        setPressReleases([]);
+      }
+    };
+
+    fetchPressReleases();
+  }, []);
+
   const financialHighlights = [
     { icon: DollarSign, title: "Total Revenue", value: "$37.0M", subtitle: "Fiscal Year 2024", color: "text-green-400" },
     { icon: TrendingUp, title: "Growth Rate", value: "+25%", subtitle: "Year over Year", color: "text-blue-400" },
     { icon: Users, title: "Mining Sites", value: "3", subtitle: "United States-based", color: "text-purple-400" },
     { icon: Calendar, title: "Operating Days", value: "365", subtitle: "24/7 Operations", color: "text-orange-400" },
-  ];
-
-  const pressReleases = [
-    {
-      title: "Digi Power X Reports Solid Mid-Year Financial Position, Removal of 'Going Concern' Risk and Positive Adjusted EBITDA in Q2 2025",
-      date: "August 14, 2025",
-      category: "Corporate News",
-      pdf: "/assets/August 14, 2025.pdf",
-    },
-    {
-      title: "Digi Power X Reports 122% Month-Over-Month Increase in Cash and Crypto Position with No Long-Term Debt and Reports July 2025 Production Results",
-      date: "August 4, 2025",
-      category: "Corporate News",
-      pdf: "/assets/August 4, 2025.pdf",
-    },
-    {
-      title: "Digi Power X Subsidiary, US Data Centers Inc., Files Provisional Patent for ARMS 200 Modular AI Data Center Platform",
-      date: "July 28, 2025",
-      category: "Financial",
-      pdf: "/assets/July 28, 2025.pdf",
-    }
   ];
 
   return (
@@ -153,20 +191,24 @@ const InvestorRelations = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">{news.date}</p>
                   {/* Title opens PDF */}
-                  <a
-                    href={news.pdf}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-medium mt-1 hover:text-primary transition-colors cursor-pointer block"
-                  >
-                    {news.title}
-                  </a>
+                  {news.pdf ? (
+                    <a
+                      href={news.pdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-medium mt-1 hover:text-primary transition-colors cursor-pointer block"
+                    >
+                      {news.title}
+                    </a>
+                  ) : (
+                    <span className="text-lg font-medium mt-1 block">{news.title}</span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* View All CTA (React Router Link) */}
+          {/* View All CTA */}
           <div className="flex justify-end mt-12">
             <Link
               to="/press-releases"

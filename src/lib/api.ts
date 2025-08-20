@@ -1,7 +1,5 @@
-// src/lib/api.ts
-
 export const API_URL =
-  import.meta.env.VITE_API_URL || "https://strapi-backend-gg6v.onrender.com";
+  import.meta.env.VITE_API_URL || "https://fruitful-nest-5c8d028fc8.strapiapp.com";
 
 export const submitContactForm = async (formData: any) => {
   const res = await fetch(`${API_URL}/api/contact-submissions`, {

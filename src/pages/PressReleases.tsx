@@ -12,23 +12,33 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowRight } from "lucide-react";
 
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://fruitful-nest-5c8d028fc8.strapiapp.com";
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN; // optional
+
 const PressReleases = () => {
   const [inView, setInView] = useState(false);
   const [pressReleases, setPressReleases] = useState<any[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
 
-  // 🔹 Fetch data from Strapi API
+  // 🔹 Fetch data from Strapi Cloud
   useEffect(() => {
     const fetchPressReleases = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:1337/api/press-releases?populate=*"
+          `${API_URL}/api/press-releases?populate=*&sort=releaseDate:desc`, // ✅ ask Strapi to sort latest first
+          {
+            headers: API_TOKEN ? { Authorization: `Bearer ${API_TOKEN}` } : {},
+          }
         );
+
         const data = res.data;
 
         // Map Strapi response to frontend format
         const mapped = data.data.map((item: any) => {
-          const attrs = item.attributes || item; // Handle both Strapi v4 (attributes) & flat JSON
+          const attrs = item.attributes || item;
 
           return {
             id: item.id,
@@ -43,10 +53,9 @@ const PressReleases = () => {
             category: attrs.Category?.replace(/"/g, "") || "General",
             excerpt: attrs.Summary || "",
             featured: attrs.Featured || false,
-            // ✅ FIX: look inside pdfFile array instead of attrs.pdf
             pdf:
               attrs.pdfFile && attrs.pdfFile.length > 0
-                ? `http://localhost:1337${attrs.pdfFile[0].url}`
+                ? attrs.pdfFile[0].url // ✅ already absolute
                 : null,
           };
         });
