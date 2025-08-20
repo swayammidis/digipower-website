@@ -10,7 +10,6 @@ import { Mail, Phone, MapPin, Clock, Send, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:1337";
-const API_TOKEN = import.meta.env.VITE_STRAPI_TOKEN || ""; // Optional secure auth
 
 const ContactUs = () => {
   const [inView, setInView] = useState(false);
@@ -20,19 +19,23 @@ const ContactUs = () => {
     email: "",
     company: "",
     subject: "",
-    message: "",
+    message: ""
   });
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) setInView(true);
+        if (entry.isIntersecting) {
+          setInView(true);
+        }
       },
       { threshold: 0.1 }
     );
 
-    if (sectionRef.current) observer.observe(sectionRef.current);
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => observer.disconnect();
   }, []);
@@ -42,32 +45,32 @@ const ContactUs = () => {
       icon: Mail,
       title: "Email",
       details: "investor@digipowerx.com",
-      description: "General inquiries and investor relations",
+      description: "General inquiries and investor relations"
     },
     {
       icon: Phone,
       title: "Phone",
       details: "+1 (555) 123-4567",
-      description: "Business hours: 9 AM - 6 PM EST",
+      description: "Business hours: 9 AM - 6 PM EST"
     },
     {
       icon: MapPin,
       title: "Headquarters",
       details: "United States",
-      description: "Multiple locations across the US",
+      description: "Multiple locations across the US"
     },
     {
       icon: Clock,
       title: "Business Hours",
       details: "Mon - Fri: 9 AM - 6 PM EST",
-      description: "Emergency contact available 24/7",
-    },
+      description: "Emergency contact available 24/7"
+    }
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
@@ -76,19 +79,15 @@ const ContactUs = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/contact-submissions`, {
+      const res = await fetch(`${API_URL}/api/contact-submission`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(API_TOKEN && { Authorization: `Bearer ${API_TOKEN}` }), // Only if token is set
         },
         body: JSON.stringify({ data: formData }),
       });
 
-      if (!res.ok) {
-        if (res.status === 403) throw new Error("Forbidden: Check Strapi permissions or API token.");
-        throw new Error(`Failed to send message (Status: ${res.status})`);
-      }
+      if (!res.ok) throw new Error("Failed to send message");
 
       toast.success("✅ Thank you for your message! We'll get back to you within 24 hours.");
 
@@ -97,11 +96,11 @@ const ContactUs = () => {
         email: "",
         company: "",
         subject: "",
-        message: "",
+        message: ""
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "❌ Something went wrong. Please try again later.");
+      toast.error("❌ Something went wrong. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -110,13 +109,13 @@ const ContactUs = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-
+      
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 bg-gradient-to-b from-background via-card/30 to-background overflow-hidden">
         <div className="absolute inset-0 tech-grid opacity-20" />
         <div className="absolute top-20 left-20 w-32 h-32 border border-primary/20 rounded-full animate-pulse-slow" />
         <div className="absolute bottom-20 right-20 w-20 h-20 border border-primary/30 rounded-lg rotate-45 animate-float" />
-
+        
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-electric bg-clip-text text-transparent animate-slide-in-left">
@@ -139,7 +138,7 @@ const ContactUs = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {contactInfo.map((info, index) => (
-              <Card
+              <Card 
                 key={index}
                 className="group bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 hover:scale-105 hover:shadow-glow text-center"
               >
@@ -148,10 +147,14 @@ const ContactUs = () => {
                     <info.icon className="w-6 h-6 text-primary" />
                   </div>
                   <CardTitle className="text-lg">{info.title}</CardTitle>
-                  <CardDescription className="text-primary font-semibold">{info.details}</CardDescription>
+                  <CardDescription className="text-primary font-semibold">
+                    {info.details}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{info.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {info.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -163,20 +166,16 @@ const ContactUs = () => {
       <section ref={sectionRef} className="py-20">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
-            <div
-              className={`text-center mb-16 transition-all duration-1000 ${
-                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-            >
+            <div className={`text-center mb-16 transition-all duration-1000 ${
+              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
               <h2 className="text-4xl font-bold mb-4 text-primary">Send Us a Message</h2>
               <p className="text-muted-foreground text-lg">We'll respond within 24 hours</p>
             </div>
 
-            <Card
-              className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 ${
-                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
-            >
+            <Card className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 ${
+              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <MessageSquare className="w-6 h-6 text-primary" />
@@ -215,7 +214,7 @@ const ContactUs = () => {
                       />
                     </div>
                   </div>
-
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="company">Company</Label>
@@ -257,15 +256,13 @@ const ContactUs = () => {
                   </div>
 
                   <div className="flex justify-center">
-                    <Button
-                      type="submit"
-                      size="lg"
+                    <Button 
+                      type="submit" 
+                      size="lg" 
                       disabled={loading}
                       className="tech-button bg-gradient-electric hover:scale-105 transition-all duration-300 min-w-[200px]"
                     >
-                      {loading ? (
-                        "Sending..."
-                      ) : (
+                      {loading ? "Sending..." : (
                         <>
                           <Send className="w-5 h-5 mr-2" />
                           Send Message
