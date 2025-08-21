@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
@@ -25,104 +24,61 @@ const Navigation = () => {
     { name: "Stock Information", href: "/stock-information" },
     { name: "SEC Filings", href: "/sec-filings" },
     { name: "Leadership & Committees", href: "/leadership" },
+    { name: "Contact", href: "/contact-us" },
   ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
-          ? "bg-background/95 backdrop-blur-lg border-b border-border shadow-tech"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex-shrink-0">
-            <div className="flex items-center gap-3 group">
-              <img
-                src="/assets/logo.png"
-                alt="Digipower X Logo"
-                className="h-10 w-auto group-hover:scale-110 transition-transform duration-300"
-              />
-            </div>
-          </Link>
+    <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-500">
+      <div
+        className={`px-6 py-4 flex items-center justify-between 
+        backdrop-blur-md border-b border-cyan-500/30 shadow-lg
+        ${isScrolled ? "bg-cyan-950/80" : "bg-cyan-900/70"}`}
+      >
+        {/* ✅ Logo */}
+        <Link to="/" className="flex items-center">
+          <img
+            src="/assets/logo.png"
+            alt="Digipower X Logo"
+            className="h-8 w-auto"
+          />
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:block">
-            <div className="ml-10 flex items-center space-x-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`transition-colors duration-300 text-sm font-medium relative group ${
-                    location.pathname === item.href
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-primary"
-                  }`}
-                >
-                  {item.name}
-                  <span
-                    className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-electric transition-all duration-300 ${
-                      location.pathname === item.href
-                        ? "w-full"
-                        : "w-0 group-hover:w-full"
-                    }`}
-                  ></span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Contact Us Button */}
-          <div className="hidden lg:block">
-            <Link to="/contact-us">
-              <Button className="tech-button bg-gradient-electric text-white hover:scale-105 transition-all duration-300">
-                Contact Us
-              </Button>
-            </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-foreground hover:text-primary"
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-          </div>
-        </div>
+        {/* ✅ Custom Square Hamburger Toggle */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-10 h-10 flex flex-col justify-center items-center gap-1.5 
+            border-2 border-cyan-400 rounded-md transition-all duration-300 
+            hover:bg-cyan-800/30 hover:scale-105"
+        >
+          {isOpen ? (
+            <X className="h-6 w-6 text-cyan-400 transition-transform duration-300" />
+          ) : (
+            <>
+              <span className="w-5 h-0.5 bg-cyan-400 rounded" />
+              <span className="w-5 h-0.5 bg-cyan-400 rounded" />
+              <span className="w-5 h-0.5 bg-cyan-400 rounded" />
+            </>
+          )}
+        </button>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* ✅ Dropdown Panel */}
       {isOpen && (
-        <div className="lg:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-card/95 backdrop-blur-lg border-b border-border">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`block px-3 py-2 text-base font-medium transition-colors duration-300 ${
-                  location.pathname === item.href
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-primary"
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
+        <div className="mt-2 mx-auto w-[95%] max-w-5xl rounded-lg bg-cyan-900/90 backdrop-blur-md border border-cyan-500/30 shadow-xl px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 animate-fadeIn">
+          {navItems.map((item) => (
             <Link
-              to="/contact-us"
-              className="block px-3 py-2 text-base font-medium text-muted-foreground hover:text-primary transition-colors duration-300"
+              key={item.name}
+              to={item.href}
+              className={`block text-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                location.pathname === item.href
+                  ? "bg-cyan-800/60 text-white shadow-[0_0_10px_rgba(34,211,238,0.7)]"
+                  : "text-gray-200 hover:text-cyan-300 hover:bg-cyan-800/30"
+              }`}
               onClick={() => setIsOpen(false)}
             >
-              Contact Us
+              {item.name}
             </Link>
-          </div>
+          ))}
         </div>
       )}
     </nav>

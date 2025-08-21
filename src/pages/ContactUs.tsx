@@ -1,42 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Clock, Send, MessageSquare } from "lucide-react";
-import { toast } from "sonner";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:1337";
+import { Mail, Phone, MapPin, Clock, MessageSquare } from "lucide-react";
+import ContactForm from "@/components/ContactForm";
 
 const ContactUs = () => {
   const [inView, setInView] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    company: "",
-    subject: "",
-    message: ""
-  });
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-        }
+        if (entry.isIntersecting) setInView(true);
       },
       { threshold: 0.1 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -66,45 +47,6 @@ const ContactUs = () => {
       description: "Emergency contact available 24/7"
     }
   ];
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${API_URL}/api/contact-submission`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: formData }),
-      });
-
-      if (!res.ok) throw new Error("Failed to send message");
-
-      toast.success("✅ Thank you for your message! We'll get back to you within 24 hours.");
-
-      setFormData({
-        full_name: "",
-        email: "",
-        company: "",
-        subject: "",
-        message: ""
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("❌ Something went wrong. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -166,16 +108,20 @@ const ContactUs = () => {
       <section ref={sectionRef} className="py-20">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
-            <div className={`text-center mb-16 transition-all duration-1000 ${
-              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+            <div
+              className={`text-center mb-16 transition-all duration-1000 ${
+                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
+            >
               <h2 className="text-4xl font-bold mb-4 text-primary">Send Us a Message</h2>
               <p className="text-muted-foreground text-lg">We'll respond within 24 hours</p>
             </div>
 
-            <Card className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 ${
-              inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}>
+            <Card
+              className={`bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 ${
+                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
+            >
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <MessageSquare className="w-6 h-6 text-primary" />
@@ -186,91 +132,8 @@ const ContactUs = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name">Full Name *</Label>
-                      <Input
-                        id="full_name"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={handleInputChange}
-                        required
-                        className="bg-background/50 border-border/50 focus:border-primary/50"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="bg-background/50 border-border/50 focus:border-primary/50"
-                        placeholder="Enter your email address"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Company</Label>
-                      <Input
-                        id="company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleInputChange}
-                        className="bg-background/50 border-border/50 focus:border-primary/50"
-                        placeholder="Enter your company name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">Subject *</Label>
-                      <Input
-                        id="subject"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        required
-                        className="bg-background/50 border-border/50 focus:border-primary/50"
-                        placeholder="What is this regarding?"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      required
-                      rows={6}
-                      className="bg-background/50 border-border/50 focus:border-primary/50 resize-none"
-                      placeholder="Please provide details about your inquiry..."
-                    />
-                  </div>
-
-                  <div className="flex justify-center">
-                    <Button 
-                      type="submit" 
-                      size="lg" 
-                      disabled={loading}
-                      className="tech-button bg-gradient-electric hover:scale-105 transition-all duration-300 min-w-[200px]"
-                    >
-                      {loading ? "Sending..." : (
-                        <>
-                          <Send className="w-5 h-5 mr-2" />
-                          Send Message
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
+                {/* ✅ Form fields only, no duplicate headers */}
+                <ContactForm />
               </CardContent>
             </Card>
           </div>
