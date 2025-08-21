@@ -31,24 +31,32 @@ const Navigation = () => {
     <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-500">
       <div
         className={`px-6 py-4 flex items-center justify-between 
-        backdrop-blur-md border-b border-cyan-500/30 shadow-lg
-        ${isScrolled ? "bg-cyan-950/80" : "bg-cyan-900/70"}`}
+        backdrop-blur-lg border-b shadow-lg
+        ${
+          isScrolled
+            ? "bg-gradient-to-r from-cyan-950/95 via-sky-950/90 to-cyan-900/95 border-cyan-500/40"
+            : "bg-gradient-to-r from-cyan-950/80 via-sky-900/70 to-cyan-900/80 border-cyan-500/30"
+        }`}
       >
         {/* ✅ Logo */}
         <Link to="/" className="flex items-center">
           <img
             src="/assets/logo.png"
             alt="Digipower X Logo"
-            className="h-10 w-auto"
+            className="h-10 w-auto drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"
           />
         </Link>
 
         {/* ✅ Custom Square Hamburger Toggle */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-10 h-10 flex flex-col justify-center items-center gap-1.5 
-            border-2 border-cyan-400 rounded-md transition-all duration-300 
-            hover:bg-cyan-800/30 hover:scale-105"
+          className={`w-10 h-10 flex flex-col justify-center items-center gap-1.5 
+            border-2 rounded-md transition-all duration-300 
+            ${
+              isOpen
+                ? "border-cyan-400 bg-cyan-800/40 shadow-[0_0_15px_rgba(34,211,238,0.8)]"
+                : "border-cyan-400 hover:bg-cyan-800/30 hover:shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+            }`}
         >
           {isOpen ? (
             <X className="h-6 w-6 text-cyan-400 transition-transform duration-300" />
@@ -64,15 +72,19 @@ const Navigation = () => {
 
       {/* ✅ Dropdown Panel */}
       {isOpen && (
-        <div className="mt-2 mx-auto w-[95%] max-w-5xl rounded-lg bg-cyan-900/90 backdrop-blur-md border border-cyan-500/30 shadow-xl px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 animate-fadeIn">
+        <div className="mt-2 mx-auto w-[95%] max-w-5xl rounded-lg 
+          bg-cyan-950/95 backdrop-blur-xl border border-cyan-500/40 
+          shadow-[0_0_20px_rgba(34,211,238,0.4)] px-6 py-4 
+          grid grid-cols-2 md:grid-cols-4 gap-4 animate-fadeIn"
+        >
           {navItems.map((item) => (
             <Link
               key={item.name}
               to={item.href}
               className={`block text-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
                 location.pathname === item.href
-                  ? "bg-cyan-800/60 text-white shadow-[0_0_10px_rgba(34,211,238,0.7)]"
-                  : "text-gray-200 hover:text-cyan-300 hover:bg-cyan-800/30"
+                  ? "bg-cyan-800/60 text-white shadow-[0_0_15px_rgba(34,211,238,0.8)]"
+                  : "text-gray-200 hover:text-cyan-300 hover:bg-cyan-800/40"
               }`}
               onClick={() => setIsOpen(false)}
             >
