@@ -39,7 +39,7 @@ const Navigation = () => {
           <img
             src="/assets/logo.png"
             alt="Digipower X Logo"
-            className="h-8 w-auto"
+            className="h-10 w-auto"
           />
         </Link>
 
